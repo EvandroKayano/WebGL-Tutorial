@@ -1,2 +1,2 @@
-# CG
- Computação Gráfica - 6º Termo 2024
+# WebGL #1
+ GettingStarted
