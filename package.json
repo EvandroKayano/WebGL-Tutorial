@@ -1,0 +1,14 @@
+{
+  "name": "cg",
+  "version": "1.0.0",
+  "description": "Computação Gráfica - 6º Termo 2024",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
