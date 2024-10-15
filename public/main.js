@@ -4,12 +4,15 @@ const gl = canvas.getContext('webgl');
 if(!gl){
     throw new Error('WebGl not supported');
 }
+<<<<<<< Updated upstream
 
 /* 
 vertexData = [...]; 1
 
 create buffer 2
 load vertexData into buffer
+=======
+>>>>>>> Stashed changes
 
 create vertex shader3
 create fragment shader
