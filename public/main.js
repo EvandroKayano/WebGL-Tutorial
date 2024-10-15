@@ -4,81 +4,91 @@ const gl = canvas.getContext('webgl');
 if(!gl){
     throw new Error('WebGl not supported');
 }
+<<<<<<< Updated upstream
 
 /* 
 vertexData = [...]; 1
+=======
+>>>>>>> Stashed changes
 
-create buffer 2
-load vertexData into buffer
 
-create vertex shader3
-create fragment shader
-create program
-attach shaders to program
-
-enable vertex attributes 4
-
-draw 5
-*/
-
-// 1
 const vertexData = [ //triangulo 2D
     0, 1, 0, 
     1,-1, 0, 
    -1,-1, 0, 
 ];
 
-// 2
-const buffer = gl.createBuffer();
-// gl to bind to this particular buffer
-// array of vertex info
-gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-// load into the current bound buffer
-// data -> float32array
-// how often to rewrite the content of this buffer (static - won't rewrite, dynamic - to rewrite often)
+const colorData = [
+    1, 0, 0, //red   V1.color
+    0, 1, 0, //green V2.color
+    0, 0, 1  //blue  V3.color
+];
+
+// BUFFERS
+
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
 
-// 3
+const colorBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorData), gl.STATIC_DRAW);
+
+
 const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-// specify the source code
+
+// VERTEX ATTRIBUTES
+// cor adicionada
+// precisão dos numeros float, lowp, mediump, highp
+// varying é a transição entre as cores do triângulo
 gl.shaderSource(vertexShader, `
+precision mediump float;
+
 attribute vec3 position;
+attribute vec3 color;
+varying vec3 vColor;
+
 void main(){
+    vColor = color;
     gl_Position = vec4(position, 1);
 }    
 `);
-// gl will compile
+
 gl.compileShader(vertexShader);
 
 // botando cor
+// locando precisão de float
 const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fragmentShader, `
-void main(){
-    gl_FragColor = vec4(1, 0, 0, 1); 
+precision mediump float;
+
+varying vec3 vColor;
+
+void main(){ 
+    gl_FragColor = vec4(vColor, 1); 
 }    
 `);
 // R G B A
 gl.compileShader(fragmentShader);
 
-// creating the program and attach all shaders
 const program = gl.createProgram();
 gl.attachShader(program,vertexShader);
 gl.attachShader(program,fragmentShader);
-// ties everything
+
 gl.linkProgram(program);
 
-// 4
-// all atributes: coordinates(position), color, normal
-//specify the program and the name of the define atribute in the shader "attribute vec3 position"
-// gl.getAttribLocation will return a number assigned by WebGl to the attribute
+
 const positionLocation = gl.getAttribLocation(program, `position`);
 gl.enableVertexAttribArray(positionLocation);
-// describe to WebGL how it should retrive attribute data from the current bound buffer
-// position, how many elements at a time, type, normalized, stride,offset
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
+
+const colorLocation = gl.getAttribLocation(program, `color`);
+gl.enableVertexAttribArray(colorLocation);
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 
 // tell gl which program to use
 gl.useProgram(program);
 
-// 5
 gl.drawArrays(gl.TRIANGLES, 0, 3);
