@@ -4,13 +4,6 @@ const gl = canvas.getContext('webgl');
 if(!gl){
     throw new Error('WebGl not supported');
 }
-<<<<<<< Updated upstream
-
-/* 
-vertexData = [...]; 1
-=======
->>>>>>> Stashed changes
-
 
 const vertexData = [ //triangulo 2D
     0, 1, 0, 
