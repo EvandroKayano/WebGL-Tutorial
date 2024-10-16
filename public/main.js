@@ -5,8 +5,10 @@ if(!gl){
     throw new Error('WebGl not supported');
 }
 
+//triangulo equilatero
+//0, 1, 0, 0.87,0.5, 0, 0,0, 0, 
 const vertexData = [ //triangulo 2D
-    0, 1, 0, 
+    0, 0.707, 0, 
     1,-1, 0, 
    -1,-1, 0, 
 ];
@@ -17,9 +19,10 @@ const colorData = [
     0, 0, 1  //blue  V3.color
 ];
 
+
 // BUFFERS
 
-const positionBuffer = gl.createBuffer();
+const positionBuffer = gl.createBuffer();   
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
 
@@ -31,9 +34,7 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorData), gl.STATIC_DRAW);
 const vertexShader = gl.createShader(gl.VERTEX_SHADER);
 
 // VERTEX ATTRIBUTES
-// cor adicionada
-// precisão dos numeros float, lowp, mediump, highp
-// varying é a transição entre as cores do triângulo
+
 gl.shaderSource(vertexShader, `
 precision mediump float;
 
@@ -41,16 +42,16 @@ attribute vec3 position;
 attribute vec3 color;
 varying vec3 vColor;
 
+uniform mat4 matrix;
+
 void main(){
     vColor = color;
-    gl_Position = vec4(position, 1);
+    gl_Position = matrix * vec4(position, 1);
 }    
 `);
 
 gl.compileShader(vertexShader);
 
-// botando cor
-// locando precisão de float
 const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fragmentShader, `
 precision mediump float;
@@ -81,7 +82,36 @@ gl.enableVertexAttribArray(colorLocation);
 gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 
-// tell gl which program to use
 gl.useProgram(program);
 
-gl.drawArrays(gl.TRIANGLES, 0, 3);
+// after program link and program use
+const uniformLocations= {
+    matrix: gl.getUniformLocation(program, `matrix`),
+};
+
+// matriz
+const matrix = mat4.create();
+
+// translação(output,input,translação)
+mat4.translate(matrix, matrix, [.2, .5, 0]); // x = x + 2
+// "zoom" scale
+mat4.scale(matrix,matrix,[0.25,0.25,0.25]);
+
+function animate(){
+    requestAnimationFrame(animate);
+
+    // rotação
+    mat4.rotateZ(matrix,matrix,Math.PI/2 /70);
+    
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+animate();
+
+/*
+the transformations applied to the matrix are replayed into the vertex in the reverse order
+
+rotations and scales first, before translation
+*/
+

@@ -1,8 +1,3 @@
-<<<<<<< Updated upstream
-# WebGl Learning
- Main Branch WebGL tutorial
+# WebGL #5
+ Spinning Triangle (MATRIX Tutorial)
 
-=======
-# WebGL #4
- Multi-color Triangle (VertexAttributes)
->>>>>>> Stashed changes
