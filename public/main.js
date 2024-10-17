@@ -5,98 +5,40 @@ if(!gl){
     throw new Error('WebGl not supported');
 }
 
+function spherePointCloud(pointCount){
+    let points = [];
+    for(let i=0; i< pointCount; i++){
+        const r = () => Math.random() - 0.5; // -0.5 < x < 0.5
+        const inputPoint = [r(), r(), r()];
 
-const vertexData = [ //cubo 1x1x1
-    // Front
-    0.5, 0.5, 0.5,
-    0.5, -.5, 0.5,
-    -.5, 0.5, 0.5,
-    -.5, 0.5, 0.5,
-    0.5, -.5, 0.5,
-    -.5, -.5, 0.5,
+        const outputPoint = vec3.normalize(vec3.create(), inputPoint);
 
-    // Left
-    -.5, 0.5, 0.5,
-    -.5, -.5, 0.5,
-    -.5, 0.5, -.5,
-    -.5, 0.5, -.5,
-    -.5, -.5, 0.5,
-    -.5, -.5, -.5,
+        points.push(...outputPoint);
 
-    // Back
-    -.5, 0.5, -.5,
-    -.5, -.5, -.5,
-    0.5, 0.5, -.5,
-    0.5, 0.5, -.5,
-    -.5, -.5, -.5,
-    0.5, -.5, -.5,
-
-    // Right
-    0.5, 0.5, -.5,
-    0.5, -.5, -.5,
-    0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
-    0.5, -.5, 0.5,
-    0.5, -.5, -.5,
-
-    // Top
-    0.5, 0.5, 0.5,
-    0.5, 0.5, -.5,
-    -.5, 0.5, 0.5,
-    -.5, 0.5, 0.5,
-    0.5, 0.5, -.5,
-    -.5, 0.5, -.5,
-
-    // Bottom
-    0.5, -.5, 0.5,
-    0.5, -.5, -.5,
-    -.5, -.5, 0.5,
-    -.5, -.5, 0.5,
-    0.5, -.5, -.5,
-    -.5, -.5, -.5, 
-];
-
-
-function randomColor(){
-    return [Math.random(), Math.random(), Math.random()];
-}
-
-
-let colorData = [];
-for(let face = 0; face < 6; face++){
-    let faceColor = randomColor();
-    for(let vertex = 0; vertex < 6; vertex++){
-        colorData.push(...faceColor);
     }
+
+    return points;
 }
 
+const vertexData = spherePointCloud(1e5);
 // BUFFERS
-
 const positionBuffer = gl.createBuffer();   
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
-
-const colorBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorData), gl.STATIC_DRAW);
-
-
-const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-
 // VERTEX ATTRIBUTES
-
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertexShader, `
 precision mediump float;
 
 attribute vec3 position;
-attribute vec3 color;
 varying vec3 vColor;
 
 uniform mat4 matrix;
 
 void main(){
-    vColor = color;
+    vColor = vec3(position.xy, 1);
     gl_Position = matrix * vec4(position, 1);
+    gl_PointSize = 1.0;
 }    
 `);
 
@@ -114,6 +56,7 @@ void main(){
 `);
 // R G B A
 gl.compileShader(fragmentShader);
+console.log(gl.getShaderInfoLog(fragmentShader));
 
 const program = gl.createProgram();
 gl.attachShader(program,vertexShader);
@@ -127,13 +70,7 @@ gl.enableVertexAttribArray(positionLocation);
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
 
-const colorLocation = gl.getAttribLocation(program, `color`);
-gl.enableVertexAttribArray(colorLocation);
-gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
-
 gl.useProgram(program);
-
 gl.enable(gl.DEPTH_TEST);
 
 // after program link and program use
@@ -155,25 +92,22 @@ mat4.perspective(projectionMatrix,
 const mvMatrix = mat4.create();
 const mvpMatrix = mat4.create();
 
-mat4.translate(modelMatrix, modelMatrix, [-1.5, 0, -2]);
+mat4.translate(modelMatrix, modelMatrix, [0, 0, 0]);
 //mat4.scale(modelMatrix,modelMatrix,[0.5,0.5,0.5]);
 
-mat4.translate(viewMatrix,viewMatrix, [-3,0,1]);
+mat4.translate(viewMatrix,viewMatrix, [0, 0.1, 2]);
 mat4.invert(viewMatrix, viewMatrix);
 
 function animate(){
     requestAnimationFrame(animate);
-/*
-    mat4.rotateX(matrix,matrix,Math.PI/2 /70);
-    mat4.rotateY(matrix,matrix,Math.PI/2 /70);
-    mat4.rotateZ(matrix,matrix,Math.PI/2 /70);
-*/ 
+
+    mat4.rotateY(modelMatrix, modelMatrix, 0.03);
 
 
     mat4.multiply(mvMatrix,viewMatrix, modelMatrix);   
     mat4.multiply(mvpMatrix, projectionMatrix, mvMatrix);
     gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix);
-    gl.drawArrays(gl.TRIANGLES, 0, vertexData.length / 3);
+    gl.drawArrays(gl.POINTS, 0, vertexData.length / 3);
 }
 
 animate();

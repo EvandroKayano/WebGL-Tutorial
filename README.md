@@ -1,2 +1,2 @@
-# WebGL #8
- Moving the Camera Around (View Matrix Tutorial)
+# WebGL #9
+ Point Cloud (DEMO)
