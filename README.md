@@ -1,2 +1,2 @@
-# WebGL #7
- Box w/ PERSPECTIVE (projection)
+# WebGL #8
+ Moving the Camera Around (View Matrix Tutorial)

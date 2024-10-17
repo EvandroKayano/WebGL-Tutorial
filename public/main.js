@@ -57,7 +57,6 @@ const vertexData = [ //cubo 1x1x1
 ];
 
 
-// 3 numero aleatorios em um array
 function randomColor(){
     return [Math.random(), Math.random(), Math.random()];
 }
@@ -67,7 +66,7 @@ let colorData = [];
 for(let face = 0; face < 6; face++){
     let faceColor = randomColor();
     for(let vertex = 0; vertex < 6; vertex++){
-        colorData.push(...faceColor); //36 cores, mas vão repetir 6 vezes pra cada face
+        colorData.push(...faceColor);
     }
 }
 
@@ -143,30 +142,37 @@ const uniformLocations= {
 };
 
 
-const matrix = mat4.create();
+const modelMatrix = mat4.create();
+const viewMatrix = mat4.create();
 const projectionMatrix = mat4.create();
 mat4.perspective(projectionMatrix,
-    75 * Math.PI /180, // field of view (angle, radians) tipo Quake Pro no mine
-    canvas.width/canvas.height, //aspect w/h
-    1e-4, // boundaries virtual camera - near cull distance
+    75 * Math.PI /180, // field of view
+    canvas.width/canvas.height,
+    1e-4, // near cull distance
     1e4 // far cull distance "render distance"
 )
 
-const finalMatrix = mat4.create();
+const mvMatrix = mat4.create();
+const mvpMatrix = mat4.create();
 
-mat4.translate(matrix, matrix, [.2, .5, -2]);
-mat4.scale(matrix,matrix,[0.5,0.5,0.5]);
+mat4.translate(modelMatrix, modelMatrix, [-1.5, 0, -2]);
+//mat4.scale(modelMatrix,modelMatrix,[0.5,0.5,0.5]);
+
+mat4.translate(viewMatrix,viewMatrix, [-3,0,1]);
+mat4.invert(viewMatrix, viewMatrix);
 
 function animate(){
     requestAnimationFrame(animate);
-
+/*
     mat4.rotateX(matrix,matrix,Math.PI/2 /70);
     mat4.rotateY(matrix,matrix,Math.PI/2 /70);
     mat4.rotateZ(matrix,matrix,Math.PI/2 /70);
-    
+*/ 
 
-    mat4.multiply(finalMatrix, projectionMatrix, matrix);
-    gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
+
+    mat4.multiply(mvMatrix,viewMatrix, modelMatrix);   
+    mat4.multiply(mvpMatrix, projectionMatrix, mvMatrix);
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix);
     gl.drawArrays(gl.TRIANGLES, 0, vertexData.length / 3);
 }
 
