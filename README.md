@@ -1,3 +1,3 @@
-# WebGL #5
- Spinning Triangle (MATRIX Tutorial)
+# WebGL #6
+ Colorful Spinning 3D box
 
