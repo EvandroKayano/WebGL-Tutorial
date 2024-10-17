@@ -5,7 +5,7 @@ if(!gl){
     throw new Error('WebGl not supported');
 }
 
-// uma caixa tem 6 faces quadradas = 12 triangulos = 36 vértices
+
 const vertexData = [ //cubo 1x1x1
     // Front
     0.5, 0.5, 0.5,
@@ -56,26 +56,12 @@ const vertexData = [ //cubo 1x1x1
     -.5, -.5, -.5, 
 ];
 
-/*
-const colorData = [
-    1, 0, 0, //red   V1.color
-    0, 1, 0, //green V2.color
-    0, 0, 1  //blue  V3.color
-];
-*/
 
 // 3 numero aleatorios em um array
 function randomColor(){
     return [Math.random(), Math.random(), Math.random()];
 }
 
-/* para triângulo
-let colorDate = [
-    ...randomColor(),
-    ...randomColor(),
-    ...randomColor(),
-];
-*/
 
 let colorData = [];
 for(let face = 0; face < 6; face++){
@@ -148,8 +134,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 
 gl.useProgram(program);
-// adiciona profundidade, não tem sobreposição de cores, não exatamente o eixo-z
-// basicamente é o recorte dos triangulos no pipeline gráfico
+
 gl.enable(gl.DEPTH_TEST);
 
 // after program link and program use
@@ -157,23 +142,31 @@ const uniformLocations= {
     matrix: gl.getUniformLocation(program, `matrix`),
 };
 
-// matriz
-const matrix = mat4.create();
 
-// translação(output,input,translação)
-mat4.translate(matrix, matrix, [.2, .5, 0]); // x = x + 2
-// "zoom" scale
-mat4.scale(matrix,matrix,[0.25,0.25,0.25]);
+const matrix = mat4.create();
+const projectionMatrix = mat4.create();
+mat4.perspective(projectionMatrix,
+    75 * Math.PI /180, // field of view (angle, radians) tipo Quake Pro no mine
+    canvas.width/canvas.height, //aspect w/h
+    1e-4, // boundaries virtual camera - near cull distance
+    1e4 // far cull distance "render distance"
+)
+
+const finalMatrix = mat4.create();
+
+mat4.translate(matrix, matrix, [.2, .5, -2]);
+mat4.scale(matrix,matrix,[0.5,0.5,0.5]);
 
 function animate(){
     requestAnimationFrame(animate);
 
-    // rotação
     mat4.rotateX(matrix,matrix,Math.PI/2 /70);
     mat4.rotateY(matrix,matrix,Math.PI/2 /70);
-    //mat4.rotateZ(matrix,matrix,Math.PI/2 /70);
+    mat4.rotateZ(matrix,matrix,Math.PI/2 /70);
     
-    gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
+
+    mat4.multiply(finalMatrix, projectionMatrix, matrix);
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
     gl.drawArrays(gl.TRIANGLES, 0, vertexData.length / 3);
 }
 

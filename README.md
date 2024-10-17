@@ -1,3 +1,2 @@
-# WebGL #6
- Colorful Spinning 3D box
-
+# WebGL #7
+ Box w/ PERSPECTIVE (projection)
