@@ -1,2 +1,2 @@
-# WebGL #10
- Drawing Imaged (TEXTURE Tutorial)
+# WebGL #11
+ Diffuse Lighting TUTORIAL
